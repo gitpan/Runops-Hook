@@ -10,4 +10,6 @@ t/03given.t
 t/04features.t
 t/05printtofh.t
 t/06counters.t
+t/07perl_Hook.t
+t/08fact.t
 META.yml                                 Module meta-data (added by MakeMaker)

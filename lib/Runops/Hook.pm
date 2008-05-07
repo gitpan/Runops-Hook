@@ -3,11 +3,20 @@ package Runops::Hook;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use DynaLoader ();
 our @ISA = qw(DynaLoader);
 __PACKAGE__->bootstrap;
+
+sub import {
+	my ( $class, @args ) = @_;
+
+	if ( @args == 1 and ref($args[0]) ) {
+		set_hook($args[0]);
+		enable();
+	}
+}
 
 1;
 
@@ -17,9 +26,28 @@ __END__
 
 =head1 NAME
 
-Runops::Hook - C level hooking of the runloop
+Runops::Hook - Hook the runloop to a C or Perl callback
 
 =head1 SYNOPSIS
+
+	use Runops::Hook;
+
+	Runops::Hook::set_hook(sub {
+		my ( $hook, $op, $arity, @args ) = @_;
+		# $hook is the hook coderef
+		# $op is the B::OP object representing PL_op
+		# $arity is a value describing what to expect in @args
+		# @args are the arguments to the operator passed by scalar reference
+	});
+
+	Runops::Hook::enable();
+
+	# code from here on is traced
+
+	Runops::Hook::disable(); # tracing stops just after entersub for 'disable' itself
+
+If you are concerned about your callback's performance you can register a C
+callback too.
 
 	# in MyHook.xs
 	bool
@@ -36,6 +64,13 @@ Runops::Hook - C level hooking of the runloop
 	BOOT:
 		Runops_Hook_set_hook(my_hook);
 		Runops_Hook_enable();
+
+=head1 STATUS
+
+This is still very much experimental and in need of usability improvements,
+docs, tests, etc.
+
+It's released for amusement/embarrassment purposes only ;-)
 
 =head1 HOOKS
 
